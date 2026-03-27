@@ -1,7 +1,7 @@
 {
-  "name": "GoonGames",
+  "name": "GoonGames Offline",
   "short_name": "GoonGames",
-  "description": "Play unblocked games offline",
+  "description": "Play games offline",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
