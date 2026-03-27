@@ -62,7 +62,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="style.css">
     
-    <!-- PWA Install Prompt -->
+    <!-- PWA Script -->
     <script>
         // Prevent leaving confirmation (existing)
         window.addEventListener('beforeunload', function (event) {
@@ -71,7 +71,7 @@
             return 'Are you sure you want to leave? Any unsaved changes will be lost.';
         });
         
-        // PWA Service Worker Registration (NEW)
+        // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
@@ -84,21 +84,19 @@
             });
         }
         
-        // PWA Install Prompt (NEW)
+        // PWA Install Prompt
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Optionally show an install button
             setTimeout(() => {
                 if (deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
-                    // You could show an install button here
                     console.log('PWA install available');
                 }
             }, 3000);
         });
         
-        // Detect if running as installed app (NEW)
+        // Detect if running as installed app
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
             document.documentElement.classList.add('pwa-mode');
             console.log('Running as installed PWA app');
@@ -197,40 +195,36 @@
             loadPrivacy();
         }
     </script>
-<script>
-// Show offline status
-window.addEventListener('load', () => {
-  // Check if offline
-  if (!navigator.onLine) {
-    showOfflineMessage();
-  }
-  
-  // Listen for online/offline events
-  window.addEventListener('online', () => {
-    hideOfflineMessage();
-  });
-  
-  window.addEventListener('offline', () => {
-    showOfflineMessage();
-  });
-});
+    <script>
+        // Show offline status
+        window.addEventListener('load', () => {
+            if (!navigator.onLine) {
+                showOfflineMessage();
+            }
+            window.addEventListener('online', () => {
+                hideOfflineMessage();
+            });
+            window.addEventListener('offline', () => {
+                showOfflineMessage();
+            });
+        });
 
-function showOfflineMessage() {
-  let msg = document.getElementById('offlineMessage');
-  if (!msg) {
-    msg = document.createElement('div');
-    msg.id = 'offlineMessage';
-    msg.innerHTML = '⚠️ You are offline. Playing cached games only.';
-    msg.style.cssText = 'position:fixed; top:0; left:0; right:0; background:#ff9800; color:#000; text-align:center; padding:10px; z-index:9999; font-weight:bold;';
-    document.body.insertBefore(msg, document.body.firstChild);
-  }
-  msg.style.display = 'block';
-}
+        function showOfflineMessage() {
+            let msg = document.getElementById('offlineMessage');
+            if (!msg) {
+                msg = document.createElement('div');
+                msg.id = 'offlineMessage';
+                msg.innerHTML = '⚠️ You are offline. Playing cached games only.';
+                msg.style.cssText = 'position:fixed; top:0; left:0; right:0; background:#ff9800; color:#000; text-align:center; padding:10px; z-index:9999; font-weight:bold;';
+                document.body.insertBefore(msg, document.body.firstChild);
+            }
+            msg.style.display = 'block';
+        }
 
-function hideOfflineMessage() {
-  const msg = document.getElementById('offlineMessage');
-  if (msg) msg.style.display = 'none';
-}
-</script>
+        function hideOfflineMessage() {
+            const msg = document.getElementById('offlineMessage');
+            if (msg) msg.style.display = 'none';
+        }
+    </script>
 </body>
 </html>
