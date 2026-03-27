@@ -1,6 +1,6 @@
-const CACHE_NAME = 'goongames-v3';
+const CACHE_NAME = 'goongames-v4';
 
-// Only cache the main files, NOT images
+// Files to cache immediately
 const urlsToCache = [
   '/',
   '/index.html',
@@ -10,25 +10,37 @@ const urlsToCache = [
   '/manifest.json'
 ];
 
+// This function adds games to cache when played
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Return cached version if available
+        if (response) {
+          return response;
+        }
+        
+        // Otherwise fetch from network
+        return fetch(event.request).then(networkResponse => {
+          // If this is a game file, cache it for offline
+          if (event.request.url.includes('/games/')) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return networkResponse;
+        });
+      })
+  );
+});
+
+// Install and activate
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
-  );
-});
-
-self.addEventListener('fetch', event => {
-  // Let images load normally from network (don't cache them)
-  if (event.request.url.match(/\.(jpg|jpeg|png|gif|webp|ico)$/)) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-  
-  // For everything else, try cache first, then network
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
   );
 });
 
