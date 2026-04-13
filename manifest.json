@@ -1,7 +1,7 @@
 {
-  "name": "GoonGames Offline",
+  "name": "GoonGames",
   "short_name": "GoonGames",
-  "description": "Play games offline",
+  "description": "Play unblocked games like Crazy Cattle 3D and DriveMad",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
@@ -10,7 +10,10 @@
     {
       "src": "favicon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["games", "entertainment"],
+  "scope": "/"
 }
