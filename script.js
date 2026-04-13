@@ -3,47 +3,18 @@ const zoneViewer = document.getElementById('zoneViewer');
 let zoneFrame = document.getElementById('zoneFrame');
 const searchBar = document.getElementById('searchBar');
 const sortOptions = document.getElementById('sortOptions');
-// https://www.jsdelivr.com/tools/purge
-const zonesurls = [
-    "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json",
-    "https://cdn.jsdelivr.net/gh/gn-math/assets@latest/zones.json",
-    "https://cdn.jsdelivr.net/gh/gn-math/assets@master/zones.json",
-    "https://cdn.jsdelivr.net/gh/gn-math/assets/zones.json"
-];
-let zonesURL = zonesurls[Math.floor(Math.random() * zonesurls.length)];
-const coverURL = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
-const htmlURL = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
+
+const zonesURL = "https://cdn.jsdelivr.net/gh/CoreScripts/assets@main/zones.json";
+const coverURL = "https://cdn.jsdelivr.net/gh/CoreScripts/covers@main";
+const htmlURL = "https://cdn.jsdelivr.net/gh/CoreScripts/html@main";
+
 let zones = [];
 let popularityData = {};
 const featuredContainer = document.getElementById('featuredZones');
+
 async function listZones() {
     try {
-      let sharesponse;
-      let shajson;
-      let sha;
-        try {
-          sharesponse = await fetch("https://api.github.com/repos/gn-math/assets/commits?t="+Date.now());
-        } catch (error) {}
-        if (sharesponse && sharesponse.status === 200) {
-          try {
-            shajson = await sharesponse.json();
-            sha = shajson[0]['sha'];
-            if (sha) {
-                zonesURL = `https://cdn.jsdelivr.net/gh/gn-math/assets@${sha}/zones.json`;
-            }
-          } catch (error) {
-            try {
-                let secondarysharesponse = await fetch("https://raw.githubusercontent.com/gn-math/xml/refs/heads/main/sha.txt?t="+Date.now());
-                if (secondarysharesponse && secondarysharesponse.status === 200) {
-                    sha = (await secondarysharesponse.text()).trim();
-                    if (sha) {
-                        zonesURL = `https://cdn.jsdelivr.net/gh/gn-math/assets@${sha}/zones.json`;
-                    }
-                }
-            } catch(error) {}
-          }
-        }
-        const response = await fetch(zonesURL+"?t="+Date.now());
+        const response = await fetch(zonesURL + "?t=" + Date.now());
         const json = await response.json();
         zones = json;
         zones[0].featured = true; // always gonna be the discord
@@ -60,7 +31,7 @@ async function listZones() {
                         window.open(zone.url, "_blank");
                     } else {
                         const url = zone.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
-                        fetch(url+"?t="+Date.now()).then(response => response.text()).then(html => {
+                        fetch(url + "?t=" + Date.now()).then(response => response.text()).then(html => {
                             document.documentElement.innerHTML = html;
                             const popup = document.createElement("div");
                             popup.style.position = "fixed";
@@ -73,9 +44,7 @@ async function listZones() {
                             popup.style.borderRadius = "5px";
                             popup.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.1)";
                             popup.style.fontFamily = "Arial, sans-serif";
-                            
-                            popup.innerHTML = `Play more games at <a href="https://gn-math.github.io" target="_blank" style="color:#004085; font-weight:bold;">https://gn-math.github.io</a>!`;
-                            
+                            popup.innerHTML = `Play more games at <a href="https://goon-games.vercel.app" target="_blank" style="color:#004085; font-weight:bold;">GoonGames</a>!`;
                             const closeBtn = document.createElement("button");
                             closeBtn.innerText = "✖";
                             closeBtn.style.marginLeft = "10px";
@@ -84,7 +53,6 @@ async function listZones() {
                             closeBtn.style.cursor = "pointer";
                             closeBtn.style.color = "#004085";
                             closeBtn.style.fontWeight = "bold";
-                            
                             closeBtn.onclick = () => popup.remove();
                             popup.appendChild(closeBtn);
                             document.body.appendChild(popup);
@@ -109,9 +77,10 @@ async function listZones() {
         container.innerHTML = `Error loading zones: ${error}`;
     }
 }
+
 async function fetchPopularity() {
     try {
-        const response = await fetch("https://data.jsdelivr.com/v1/stats/packages/gh/gn-math/html@main/files?period=year");
+        const response = await fetch("https://data.jsdelivr.com/v1/stats/packages/gh/CoreScripts/html@main/files?period=year");
         const data = await response.json();
         data.forEach(file => {
             const idMatch = file.name.match(/\/(\d+)\.html$/);
@@ -180,13 +149,10 @@ function displayFeaturedZones(featuredZones) {
             }
         });
     }, {
-        rootMargin: "100px", 
+        rootMargin: "100px",
         threshold: 0.1
     });
-
-    lazyImages.forEach(img => {
-        imageObserver.observe(img);
-    });
+    lazyImages.forEach(img => imageObserver.observe(img));
 }
 
 function displayZones(zones) {
@@ -227,13 +193,10 @@ function displayZones(zones) {
             }
         });
     }, {
-        rootMargin: "100px", 
+        rootMargin: "100px",
         threshold: 0.1
     });
-
-    lazyImages.forEach(img => {
-        imageObserver.observe(img);
-    });
+    lazyImages.forEach(img => imageObserver.observe(img));
 }
 
 function filterZones() {
@@ -250,7 +213,7 @@ function openZone(file) {
         window.open(file.url, "_blank");
     } else {
         const url = file.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
-        fetch(url+"?t="+Date.now()).then(response => response.text()).then(html => {
+        fetch(url + "?t=" + Date.now()).then(response => response.text()).then(html => {
             if (zoneFrame.contentDocument === null) {
                 zoneFrame = document.createElement("iframe");
                 zoneFrame.id = "zoneFrame";
@@ -276,13 +239,13 @@ function openZone(file) {
 function aboutBlank() {
     const newWindow = window.open("about:blank", "_blank");
     let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent).url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
-    fetch(zone+"?t="+Date.now()).then(response => response.text()).then(html => {
+    fetch(zone + "?t=" + Date.now()).then(response => response.text()).then(html => {
         if (newWindow) {
             newWindow.document.open();
             newWindow.document.write(html);
             newWindow.document.close();
         }
-    })
+    });
 }
 
 function closeZone() {
@@ -295,10 +258,8 @@ function closeZone() {
 
 function downloadZone() {
     let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent);
-    fetch(zone.url.replace("{HTML_URL}", htmlURL)+"?t="+Date.now()).then(res => res.text()).then(text => {
-        const blob = new Blob([text], {
-            type: "text/plain;charset=utf-8"
-        });
+    fetch(zone.url.replace("{HTML_URL}", htmlURL) + "?t=" + Date.now()).then(res => res.text()).then(text => {
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -324,207 +285,176 @@ function fullscreenZone() {
 
 function sanitizeData(obj, maxStringLen = 1000, maxArrayLen = 10000) {
     if (typeof obj === 'string') {
-      return obj.length > maxStringLen ? obj.slice(0, maxStringLen) + '...[truncated]' : obj;
+        return obj.length > maxStringLen ? obj.slice(0, maxStringLen) + '...[truncated]' : obj;
     }
-    
     if (obj instanceof Uint8Array) {
-      if (obj.length > maxArrayLen) {
-        return `[Uint8Array too large (${obj.length} bytes), truncated]`;
-      }
-      return obj;
-    }
-    
-    if (Array.isArray(obj)) {
-      return obj.map(item => sanitizeData(item, maxStringLen, maxArrayLen));
-    }
-    
-    if (obj && typeof obj === 'object') {
-      const newObj = {};
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          newObj[key] = sanitizeData(obj[key], maxStringLen, maxArrayLen);
+        if (obj.length > maxArrayLen) {
+            return `[Uint8Array too large (${obj.length} bytes), truncated]`;
         }
-      }
-      return newObj;
+        return obj;
     }
-    
+    if (Array.isArray(obj)) {
+        return obj.map(item => sanitizeData(item, maxStringLen, maxArrayLen));
+    }
+    if (obj && typeof obj === 'object') {
+        const newObj = {};
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                newObj[key] = sanitizeData(obj[key], maxStringLen, maxArrayLen);
+            }
+        }
+        return newObj;
+    }
     return obj;
-  }
+}
 
 async function saveData() {
     alert("This might take a while, dont touch anything other than this OK button");
     const result = {};
     result.cookies = document.cookie;
-    result.localStorage = {...localStorage};
-    result.sessionStorage = {...sessionStorage};
+    result.localStorage = { ...localStorage };
+    result.sessionStorage = { ...sessionStorage };
     result.indexedDB = {};
     const dbs = await indexedDB.databases();
     for (const dbInfo of dbs) {
-      if (!dbInfo.name) continue;
-      result.indexedDB[dbInfo.name] = {};
-      await new Promise((resolve, reject) => {
-        const openRequest = indexedDB.open(dbInfo.name, dbInfo.version);
-        openRequest.onerror = () => reject(openRequest.error);
-        openRequest.onsuccess = () => {
-          const db = openRequest.result;
-          const storeNames = Array.from(db.objectStoreNames);
-          if (storeNames.length === 0) {
-            resolve();
-            return;
-          }
-          const transaction = db.transaction(storeNames, "readonly");
-          const storePromises = [];
-          for (const storeName of storeNames) {
-            result.indexedDB[dbInfo.name][storeName] = [];
-            const store = transaction.objectStore(storeName);
-            const getAllRequest = store.getAll();
-            const p = new Promise((res, rej) => {
-              getAllRequest.onsuccess = () => {
-                result.indexedDB[dbInfo.name][storeName] = sanitizeData(getAllRequest.result, 1000, 100);
-                res();
-              };
-              getAllRequest.onerror = () => rej(getAllRequest.error);
-            });
-            storePromises.push(p);
-          }
-          Promise.all(storePromises).then(() => resolve());
-        };
-      });
+        if (!dbInfo.name) continue;
+        result.indexedDB[dbInfo.name] = {};
+        await new Promise((resolve, reject) => {
+            const openRequest = indexedDB.open(dbInfo.name, dbInfo.version);
+            openRequest.onerror = () => reject(openRequest.error);
+            openRequest.onsuccess = () => {
+                const db = openRequest.result;
+                const storeNames = Array.from(db.objectStoreNames);
+                if (storeNames.length === 0) { resolve(); return; }
+                const transaction = db.transaction(storeNames, "readonly");
+                const storePromises = [];
+                for (const storeName of storeNames) {
+                    result.indexedDB[dbInfo.name][storeName] = [];
+                    const store = transaction.objectStore(storeName);
+                    const getAllRequest = store.getAll();
+                    const p = new Promise((res, rej) => {
+                        getAllRequest.onsuccess = () => {
+                            result.indexedDB[dbInfo.name][storeName] = sanitizeData(getAllRequest.result, 1000, 100);
+                            res();
+                        };
+                        getAllRequest.onerror = () => rej(getAllRequest.error);
+                    });
+                    storePromises.push(p);
+                }
+                Promise.all(storePromises).then(() => resolve());
+            };
+        });
     }
-
     result.caches = {};
     const cacheNames = await caches.keys();
     for (const cacheName of cacheNames) {
-      const cache = await caches.open(cacheName);
-      const requests = await cache.keys();
-      result.caches[cacheName] = [];
-      for (const req of requests) {
-        const response = await cache.match(req);
-        if (!response) continue;
-        const cloned = response.clone();
-        const contentType = cloned.headers.get('content-type') || '';
-        let body;
-        try {
-          if (contentType.includes('application/json')) {
-            body = await cloned.json();
-          } else if (contentType.includes('text') || contentType.includes('javascript')) {
-            body = await cloned.text();
-          } else {
-            const buffer = await cloned.arrayBuffer();
-            body = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-          }
-        } catch (e) {
-          body = '[Unable to read body]';
+        const cache = await caches.open(cacheName);
+        const requests = await cache.keys();
+        result.caches[cacheName] = [];
+        for (const req of requests) {
+            const response = await cache.match(req);
+            if (!response) continue;
+            const cloned = response.clone();
+            const contentType = cloned.headers.get('content-type') || '';
+            let body;
+            try {
+                if (contentType.includes('application/json')) {
+                    body = await cloned.json();
+                } else if (contentType.includes('text') || contentType.includes('javascript')) {
+                    body = await cloned.text();
+                } else {
+                    const buffer = await cloned.arrayBuffer();
+                    body = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+                }
+            } catch (e) {
+                body = '[Unable to read body]';
+            }
+            result.caches[cacheName].push({ url: req.url, body, contentType });
         }
-        result.caches[cacheName].push({
-          url: req.url,
-          body,
-          contentType
-        });
-      }
     }
-  
     alert("Done, wait for the download to come");
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([JSON.stringify(result)], {
-        type: "text/plain"
-    }));
+    link.href = URL.createObjectURL(new Blob([JSON.stringify(result)], { type: "text/plain" }));
     link.download = `${Date.now()}.data`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
-  
-  async function loadData(event) {
+}
+
+async function loadData(event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async function (e) {
         const data = JSON.parse(e.target.result);
         if (data.cookies) {
-            data.cookies.split(';').forEach(cookie => {
-              document.cookie = cookie.trim();
-            });
-          }
-        
-          if (data.localStorage) {
-            for (const key in data.localStorage) {
-              localStorage.setItem(key, data.localStorage[key]);
-            }
-          }
-        
-          if (data.sessionStorage) {
-            for (const key in data.sessionStorage) {
-              sessionStorage.setItem(key, data.sessionStorage[key]);
-            }
-          }
-        
-          if (data.indexedDB) {
+            data.cookies.split(';').forEach(cookie => { document.cookie = cookie.trim(); });
+        }
+        if (data.localStorage) {
+            for (const key in data.localStorage) { localStorage.setItem(key, data.localStorage[key]); }
+        }
+        if (data.sessionStorage) {
+            for (const key in data.sessionStorage) { sessionStorage.setItem(key, data.sessionStorage[key]); }
+        }
+        if (data.indexedDB) {
             for (const dbName in data.indexedDB) {
-              const stores = data.indexedDB[dbName];
-              await new Promise((resolve, reject) => {
-                const request = indexedDB.open(dbName, 1);
-                request.onupgradeneeded = e => {
-                  const db = e.target.result;
-                  for (const storeName in stores) {
-                    if (!db.objectStoreNames.contains(storeName)) {
-                      db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
-                    }
-                  }
-                };
-                request.onsuccess = e => {
-                  const db = e.target.result;
-                  const transaction = db.transaction(Object.keys(stores), 'readwrite');
-                  transaction.onerror = () => reject(transaction.error);
-                  let pendingStores = Object.keys(stores).length;
-        
-                  for (const storeName in stores) {
-                    const objectStore = transaction.objectStore(storeName);
-                    objectStore.clear().onsuccess = () => {
-                      for (const item of stores[storeName]) {
-                        objectStore.put(item);
-                      }
-                      pendingStores--;
-                      if (pendingStores === 0) resolve();
+                const stores = data.indexedDB[dbName];
+                await new Promise((resolve, reject) => {
+                    const request = indexedDB.open(dbName, 1);
+                    request.onupgradeneeded = e => {
+                        const db = e.target.result;
+                        for (const storeName in stores) {
+                            if (!db.objectStoreNames.contains(storeName)) {
+                                db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+                            }
+                        }
                     };
-                  }
-                };
-                request.onerror = () => reject(request.error);
-              });
+                    request.onsuccess = e => {
+                        const db = e.target.result;
+                        const transaction = db.transaction(Object.keys(stores), 'readwrite');
+                        transaction.onerror = () => reject(transaction.error);
+                        let pendingStores = Object.keys(stores).length;
+                        for (const storeName in stores) {
+                            const objectStore = transaction.objectStore(storeName);
+                            objectStore.clear().onsuccess = () => {
+                                for (const item of stores[storeName]) { objectStore.put(item); }
+                                pendingStores--;
+                                if (pendingStores === 0) resolve();
+                            };
+                        }
+                    };
+                    request.onerror = () => reject(request.error);
+                });
             }
-          }
-        
-          if (data.caches) {
+        }
+        if (data.caches) {
             for (const cacheName in data.caches) {
-              const cache = await caches.open(cacheName);
-              await cache.keys().then(keys => Promise.all(keys.map(k => cache.delete(k)))); // clear existing
-        
-              for (const entry of data.caches[cacheName]) {
-                let responseBody;
-                if (entry.contentType.includes('application/json')) {
-                  responseBody = JSON.stringify(entry.body);
-                } else if (entry.contentType.includes('text') || entry.contentType.includes('javascript')) {
-                  responseBody = entry.body;
-                } else {
-                  const binaryStr = atob(entry.body);
-                  const len = binaryStr.length;
-                  const bytes = new Uint8Array(len);
-                  for (let i = 0; i < len; i++) {
-                    bytes[i] = binaryStr.charCodeAt(i);
-                  }
-                  responseBody = bytes.buffer;
+                const cache = await caches.open(cacheName);
+                await cache.keys().then(keys => Promise.all(keys.map(k => cache.delete(k))));
+                for (const entry of data.caches[cacheName]) {
+                    let responseBody;
+                    if (entry.contentType.includes('application/json')) {
+                        responseBody = JSON.stringify(entry.body);
+                    } else if (entry.contentType.includes('text') || entry.contentType.includes('javascript')) {
+                        responseBody = entry.body;
+                    } else {
+                        const binaryStr = atob(entry.body);
+                        const len = binaryStr.length;
+                        const bytes = new Uint8Array(len);
+                        for (let i = 0; i < len; i++) { bytes[i] = binaryStr.charCodeAt(i); }
+                        responseBody = bytes.buffer;
+                    }
+                    const headers = new Headers({ 'content-type': entry.contentType });
+                    const response = new Response(responseBody, { headers });
+                    await cache.put(entry.url, response);
                 }
-                const headers = new Headers({ 'content-type': entry.contentType });
-                const response = new Response(responseBody, { headers });
-                await cache.put(entry.url, response);
-              }
             }
-          }
+        }
         alert("Data loaded");
     };
     alert("This might take a while, dont touch anything other than this OK button");
     reader.readAsText(file);
-  }
+}
 
 function darkMode() {
     document.body.classList.toggle("dark-mode");
@@ -533,16 +463,17 @@ function darkMode() {
 function cloakIcon(url) {
     const link = document.querySelector("link[rel~='icon']");
     link.rel = "icon";
-    if ((url+"").trim().length === 0) {
+    if ((url + "").trim().length === 0) {
         link.href = "favicon.png";
     } else {
         link.href = url;
     }
     document.head.appendChild(link);
 }
+
 function cloakName(string) {
-    if ((string+"").trim().length === 0) {
-        document.title = "gn-math";
+    if ((string + "").trim().length === 0) {
+        document.title = "GoonGames";
         return;
     }
     document.title = string;
@@ -553,11 +484,11 @@ function tabCloak() {
     document.getElementById('popupTitle').textContent = "Tab Cloak";
     const popupBody = document.getElementById('popupBody');
     popupBody.innerHTML = `
-        <label for="tab-cloak-textbox" style="font-weight: bold;">Set Tab Title:</label><br>
-        <input type="text" id="tab-cloak-textbox" placeholder="Enter new tab name..." oninput="cloakName(this.value)">
+        <label style="font-weight: bold;">Set Tab Title:</label><br>
+        <input type="text" placeholder="Enter new tab name..." oninput="cloakName(this.value)">
         <br><br><br><br>
-        <label for="tab-cloak-textbox" style="font-weight: bold;">Set Tab Icon:</label><br>
-        <input type="text" id="tab-cloak-textbox" placeholder="Enter new tab icon..." oninput='cloakIcon(this.value)'>
+        <label style="font-weight: bold;">Set Tab Icon:</label><br>
+        <input type="text" placeholder="Enter new tab icon URL..." oninput='cloakIcon(this.value)'>
         <br><br><br>
     `;
     popupBody.contentEditable = false;
@@ -569,10 +500,10 @@ settings.addEventListener('click', () => {
     document.getElementById('popupTitle').textContent = "Settings";
     const popupBody = document.getElementById('popupBody');
     popupBody.innerHTML = `
-    <button id="settings-button" onclick="darkMode()">Toggle Dark Mode</button>
-    <br><br>
-    <button id="settings-button" onclick="tabCloak()">Tab Cloak</button>
-    <br>
+        <button id="settings-button" onclick="darkMode()">Toggle Dark Mode</button>
+        <br><br>
+        <button id="settings-button" onclick="tabCloak()">Tab Cloak</button>
+        <br>
     `;
     popupBody.contentEditable = false;
     document.getElementById('popupOverlay').style.display = "flex";
@@ -582,8 +513,9 @@ function showContact() {
     document.getElementById('popupTitle').textContent = "Contact";
     const popupBody = document.getElementById('popupBody');
     popupBody.innerHTML = `
-    <p>Discord: https://discord.gg/NAFw4ykZ7n</p>
-    <p>Email: gn.math.business@gmail.com</p>`;
+        <p>Discord: https://discord.gg/NAFw4ykZ7n</p>
+        <p>Email: gn.math.business@gmail.com</p>
+    `;
     popupBody.contentEditable = false;
     document.getElementById('popupOverlay').style.display = "flex";
 }
@@ -595,31 +527,16 @@ function loadPrivacy() {
         <div style="max-height: 60vh; overflow-y: auto;">
             <h2>PRIVACY POLICY</h2>
             <p>Last updated April 17, 2025</p>
-            <p>This Privacy Notice for gn-math ("we," "us," or "our"), describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services ("Services"), including when you:</p>
-            <ul>
-                <li>Visit our website at <a href="https://gn-math.github.io">https://gn-math.github.io</a>, or any website of ours that links to this Privacy Notice</li>
-                <li>Engage with us in other related ways, including any sales, marketing, or events</li>
-            </ul>
-            <p>Questions or concerns? Reading this Privacy Notice will help you understand your privacy rights and choices. We are responsible for making decisions about how your personal information is processed. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at <a href="https://discord.gg/NAFw4ykZ7n">https://discord.gg/NAFw4ykZ7n</a>.</p>
-            
+            <p>This Privacy Notice for GoonGames describes how and why we might access, collect, store, use, and/or share your personal information when you use our services.</p>
+            <p>Questions or concerns? Contact us at <a href="https://discord.gg/NAFw4ykZ7n">https://discord.gg/NAFw4ykZ7n</a>.</p>
             <h3>SUMMARY OF KEY POINTS</h3>
-            <p>This summary provides key points from our Privacy Notice, but you can find out more details about any of these topics by clicking the link following each key point or by using our table of contents below to find the section you are looking for.</p>
-            
-            <p><strong>What personal information do we process?</strong> When you visit, use, or navigate our Services, we may process personal information depending on how you interact with us and the Services, the choices you make, and the products and features you use. Learn more about personal information you disclose to us.</p>
-            
-            <p><strong>Do we process any sensitive personal information?</strong> Some of the information may be considered "special" or "sensitive" in certain jurisdictions, for example your racial or ethnic origins, sexual orientation, and religious beliefs. We do not process sensitive personal information.</p>
-            
+            <p><strong>What personal information do we process?</strong> When you visit, use, or navigate our Services, we may process personal information depending on how you interact with us and the Services, the choices you make, and the products and features you use.</p>
+            <p><strong>Do we process any sensitive personal information?</strong> We do not process sensitive personal information.</p>
             <p><strong>Do we collect any information from third parties?</strong> We do not collect any information from third parties.</p>
-            
-            <p><strong>How do we process your information?</strong> We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law. We may also process your information for other purposes with your consent. We process your information only when we have a valid legal reason to do so. Learn more about how we process your information.</p>
-            
-            <p><strong>In what situations and with which parties do we share personal information?</strong> We may share information in specific situations and with specific third parties. Learn more about when and with whom we share your personal information.</p>
-            
-            <p><strong>How do we keep your information safe?</strong> We have adequate organizational and technical processes and procedures in place to protect your personal information. However, no electronic transmission over the internet or information storage technology can be guaranteed to be 100% secure, so we cannot promise or guarantee that hackers, cybercriminals, or other unauthorized third parties will not be able to defeat our security and improperly collect, access, steal, or modify your information. Learn more about how we keep your information safe.</p>
-            
-            <p><strong>What are your rights?</strong> Depending on where you are located geographically, the applicable privacy law may mean you have certain rights regarding your personal information. Learn more about your privacy rights.</p>
-            
-            <p><strong>How do you exercise your rights?</strong> The easiest way to exercise your rights is by submitting a data subject access request, or by contacting us. We will consider and act upon any request in accordance with applicable data protection laws.</p>
+            <p><strong>How do we process your information?</strong> We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law.</p>
+            <p><strong>How do we keep your information safe?</strong> We have adequate organizational and technical processes and procedures in place to protect your personal information. However, no electronic transmission over the internet can be guaranteed to be 100% secure.</p>
+            <p><strong>What are your rights?</strong> Depending on where you are located geographically, the applicable privacy law may mean you have certain rights regarding your personal information.</p>
+            <p><strong>How do you exercise your rights?</strong> The easiest way to exercise your rights is by contacting us. We will consider and act upon any request in accordance with applicable data protection laws.</p>
         </div>
     `;
     popupBody.contentEditable = false;
@@ -629,6 +546,7 @@ function loadPrivacy() {
 function closePopup() {
     document.getElementById('popupOverlay').style.display = "none";
 }
+
 listZones();
 
 const schoolList = ["deledao", "goguardian", "lightspeed", "linewize", "securly", ".edu/"];
